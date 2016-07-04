@@ -22,8 +22,11 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
@@ -33,8 +36,9 @@ import org.apache.jena.vocabulary.RDF;
 import org.topbraid.spin.model.SPINFactory;
 import org.topbraid.spin.vocabulary.SP;
 
-import de.dfki.resc28.sodalite.vocabularies.ACTN;
 import de.dfki.resc28.igraphstore.IGraphStore;
+import de.dfki.resc28.sodalite.vocabularies.ACTN;
+import de.dfki.resc28.sodalite.vocabularies.LTS;
 
 public class Action implements IAction 
 {
@@ -98,9 +102,56 @@ public class Action implements IAction
 	}
 
 	@Override
-	public Model updateState(Model consumable) 
+	public Model updateState(Model modifiedState) 
 	{
-		throw new WebApplicationException(Status.NOT_IMPLEMENTED);
+		// select nextState from machineModel, depends on currentState and currentAction
+		Model machineModel = fGraphStore.getNamedGraph(((Resource) modifiedState.listObjectsOfProperty(LTS.model).next()).getURI().toString());
+		Resource device = machineModel.listSubjectsWithProperty(RDF.type, LTS.StateMachine).next().asResource();
+		
+		// FIXME: nasty hack!
+		RDFNode stateIndicatorAsNode = machineModel.listObjectsOfProperty(LTS.stateIndicator).next();
+		Property stateIndicator = ResourceFactory.createProperty(stateIndicatorAsNode.asNode().getURI().toString());
+		Resource currentState = modifiedState.listObjectsOfProperty(stateIndicator).next().asResource();
+		
+		PrefixMapping pfxMap = PrefixMapping.Factory.create();
+		pfxMap.setNsPrefixes(modifiedState.getNsPrefixMap());
+		pfxMap.setNsPrefixes(machineModel.getNsPrefixMap());
+		Prologue sparqlPrologue = new Prologue(pfxMap);
+		String queryString = String.format("SELECT ?next FROM <%s> WHERE { ?a rdf:type lts:StateMachine ; lts:contains [ rdf:type lts:Transition ; lts:source [ lts:stateID  <%s> ] ; lts:label <%s> ; lts:target [ lts:stateID  ?next ] ] . }", 
+				  						   ((Resource) modifiedState.listObjectsOfProperty(LTS.model).next()).getURI().toString(),
+				  						   currentState.getURI().toString(), 
+				  						   fURI) ;
+		Query q = QueryFactory.parse(new Query(sparqlPrologue),
+									queryString,
+									null,
+									null);
+		QueryExecution e = QueryExecutionFactory.create(q, machineModel);
+		Resource nextState = e.execSelect().next().getResource("?next");
+
+		// remove all actn:action Triples of the currentState
+		modifiedState.remove(modifiedState.listStatements(device, ACTN.action, (RDFNode) null));
+		modifiedState.remove(modifiedState.listStatements(device, stateIndicator, (RDFNode) null));
+		
+		
+		
+		Query nextActions = QueryFactory.parse(new Query(sparqlPrologue),
+											   String.format("SELECT ?nextAction FROM <%s> WHERE { ?a rdf:type lts:StateMachine ; lts:contains [ rdf:type lts:Transition ; lts:source [ lts:stateID <%s> ] ; lts:label ?nextAction ] . }", 
+													   ((Resource) modifiedState.listObjectsOfProperty(LTS.model).next()).getURI().toString(),
+													   nextState.getURI().toString()),
+				 							   null,
+				 							   null);
+		
+		// set the nextState and its actn:action triples
+		modifiedState.add(device, stateIndicator, nextState);
+		ResultSet rs = QueryExecutionFactory.create(nextActions, machineModel).execSelect(); 
+		while (rs.hasNext())
+		{
+			modifiedState.add(device, ACTN.action, rs.next().get("?nextAction").asResource());
+		}
+
+		fGraphStore.replaceDefaultGraph(modifiedState);
+		
+		return fGraphStore.getDefaultGraph(); 
 	}
 
 	public boolean isApplicable()
@@ -140,7 +191,7 @@ public class Action implements IAction
 	public Set<String> getAllowedMethods() 
 	{
 		HashSet<String> allowedMethods = new HashSet<String>();
-		allowedMethods.add(HttpMethod.OPTIONS);
+		allowedMethods.add(HttpMethod.GET);
 	    return allowedMethods;
 	}
 	

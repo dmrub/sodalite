@@ -16,7 +16,7 @@ public interface IAction
 {	
 	public abstract Model performTasks(Model consumable);
 	
-	public abstract Model updateState(Model consumable);
+	public abstract Model updateState(Model modifiedState);
 	
 	public abstract Response describe(String acceptType);
 	
