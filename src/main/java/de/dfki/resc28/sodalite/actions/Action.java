@@ -192,6 +192,22 @@ public class Action implements IAction
 	{
 		HashSet<String> allowedMethods = new HashSet<String>();
 		allowedMethods.add(HttpMethod.GET);
+		
+		// get bindings from actionModel
+		Model actionModel = fGraphStore.getNamedGraph(fURI);
+		PrefixMapping pfxMap = PrefixMapping.Factory.create();
+		pfxMap.setNsPrefixes(actionModel.getGraph().getPrefixMapping());
+		Prologue sparqlPrologue = new Prologue(pfxMap);
+		Query q = QueryFactory.parse(new Query(sparqlPrologue),
+				 					 "SELECT ?mth FROM <" + fURI + "> WHERE { _:a actn:binding [ http:mthd ?mth ] . }",
+				 					 null,
+				 					 null);
+		ResultSet rs = QueryExecutionFactory.create(q, actionModel).execSelect();
+		while (rs.hasNext())
+		{
+			allowedMethods.add(rs.nextSolution().get("?mth").asResource().getLocalName());
+		}
+		
 	    return allowedMethods;
 	}
 	
