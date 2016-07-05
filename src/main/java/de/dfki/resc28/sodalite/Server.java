@@ -19,7 +19,7 @@ public abstract class Server extends Application
     {
 		/* use this to construct your services
 		 
-        ActionService foo = new ActionService(new FusekiGraphStore(dataEndpoint, queryEndpoint));
+        ActionProvider foo = new ActionProvider(new FusekiGraphStore(dataEndpoint, queryEndpoint));
         return new HashSet<Object>(Arrays.asList(foo));
         
 		*/

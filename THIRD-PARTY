@@ -1,5 +1,5 @@
 
-Lists of 50 third-party dependencies.
+Lists of 51 third-party dependencies.
      (GNU Lesser General Public License, Version 2.1) (The Apache Software License, Version 2.0) Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.3.0 - http://wiki.fasterxml.com/JacksonHome)
      (GNU Lesser General Public License, Version 2.1) (The Apache Software License, Version 2.0) Jackson-core (com.fasterxml.jackson.core:jackson-core:2.3.3 - http://wiki.fasterxml.com/JacksonHome)
      (GNU Lesser General Public License, Version 2.1) (The Apache Software License, Version 2.0) jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.3.3 - http://wiki.fasterxml.com/JacksonHome)
@@ -12,6 +12,7 @@ Lists of 50 third-party dependencies.
      (The Apache Software License, Version 2.0) Commons IO (commons-io:commons-io:2.4 - http://commons.apache.org/io/)
      (The Apache Software License, Version 2.0) Commons Lang (commons-lang:commons-lang:2.6 - http://commons.apache.org/lang/)
      (The Apache Software License, Version 2.0) Apache Commons Logging (commons-logging:commons-logging:1.2 - http://commons.apache.org/proper/commons-logging/)
+     (Unknown license) fLAPjACk - a "Linked dAta PlAtform Core" (de.dfki.resc28:flapjack:0.0.1-SNAPSHOT - https://github.com/rmrschub/flapjack)
      (Unknown license) IGraphStore (de.dfki.resc28:igraphstore:0.1 - https://github.com/rmrschub/igraphstore)
      (CDDL + GPLv2 with classpath exception) javax.annotation API (javax.annotation:javax.annotation-api:1.2 - http://jcp.org/en/jsr/detail?id=250)
      (CDDL + GPLv2 with classpath exception) Java Servlet API (javax.servlet:javax.servlet-api:3.1.0 - http://servlet-spec.java.net)

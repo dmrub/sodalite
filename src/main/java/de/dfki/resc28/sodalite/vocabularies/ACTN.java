@@ -17,6 +17,7 @@ public final class ACTN
   /** 
    * Classes as org.apache.jena.rdf.model.Resource
    */
+  public static final Resource ActionableResource = resource(CONSTANTS.CLASS_ActionableResource);
   public static final Resource Action = resource(CONSTANTS.CLASS_Action);
   public static final Resource ListAction = resource(CONSTANTS.CLASS_ListAction);
 
@@ -56,6 +57,8 @@ public final class ACTN
     /**
      * Local and namespace names of RDF(S) classes as strings 
      */
+    private static final String CLASS_LNAME_ActionableResource = "ActionableResource";
+    private static final String CLASS_ActionableResource = nsName(CLASS_LNAME_ActionableResource);
     private static final String CLASS_LNAME_Action = "Action";
     private static final String CLASS_Action = nsName(CLASS_LNAME_Action);
     private static final String CLASS_LNAME_ListAction = "ListAction";

@@ -16,13 +16,17 @@ import de.dfki.resc28.sodalite.vocabularies.ACTN;
  * @author resc01
  *
  */
-public class ActionController 
+public class ActionController implements IActionController 
 {
 	public ActionController(IGraphStore graphStore)
 	{
 		this.fGraphStore = graphStore;
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.dfki.resc28.sodalite.actions.IActionController#get(java.lang.String)
+	 */
+	@Override
 	public IAction get(String actionURI)
 	{
 		Model actionModel = fGraphStore.getNamedGraph(actionURI);
