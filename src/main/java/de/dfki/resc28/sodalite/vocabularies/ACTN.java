@@ -25,6 +25,7 @@ public final class ACTN
    * Properties as org.apache.jena.rdf.model.Property
    */
   public static final Property action = property(CONSTANTS.PROP_action);
+  public static final Property affordedBy = property(CONSTANTS.PROP_affordedBy);
 
 
   /**
@@ -68,7 +69,10 @@ public final class ACTN
      */
     private static final String PROP_LNAME_action = "action";
     private static final String PROP_action = nsName(PROP_LNAME_action);
-
+    private static final String PROP_LNAME_affordedBy = "affordedBy";
+    private static final String PROP_affordedBy = nsName(PROP_LNAME_affordedBy);
+    private static final String PROP_LNAME_affords = "affords";
+    private static final String PROP_affords = nsName(PROP_LNAME_affords);
  
     /**
      * Returns the full namespace name of a vocabulary element as a string

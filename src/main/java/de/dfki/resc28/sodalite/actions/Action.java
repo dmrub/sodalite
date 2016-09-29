@@ -51,13 +51,13 @@ public class Action implements IAction
 
 	public Response describe(final String acceptType) 
 	{
-		final Model description = fGraphStore.getNamedGraph(fURI);
+		final Model actionModel = fGraphStore.getNamedGraph(fURI);
 		
 		StreamingOutput out = new StreamingOutput() 
 		{
 			public void write(OutputStream output) throws IOException, WebApplicationException
 			{
-				RDFDataMgr.write(output, description, RDFDataMgr.determineLang(null, acceptType, null)) ;
+				RDFDataMgr.write(output, actionModel, RDFDataMgr.determineLang(null, acceptType, null)) ;
 			}
 		};
 		
@@ -70,7 +70,7 @@ public class Action implements IAction
 	{
 		Model consumable = ModelFactory.createDefaultModel(); 
 		RDFDataMgr.read(consumable, consumableStream, RDFDataMgr.determineLang(null, acceptType, null));
-		
+			
 		if (isApplicable() & isValidConsumable(consumable))
 		{
 			final Model producible = updateState((Model) performTasks(consumable));
@@ -149,14 +149,23 @@ public class Action implements IAction
 			modifiedState.add(device, ACTN.action, rs.next().get("?nextAction").asResource());
 		}
 
-		fGraphStore.replaceDefaultGraph(modifiedState);
 		
-		return fGraphStore.getDefaultGraph(); 
+		Model actionModel = fGraphStore.getNamedGraph(fURI);
+		Resource action = ResourceFactory.createResource(fURI);
+		Resource actionableResource = actionModel.listSubjectsWithProperty(ACTN.affordedBy, action).next().asResource();
+		
+		fGraphStore.replaceNamedGraph(actionableResource.getURI(), modifiedState);
+		
+		return fGraphStore.getNamedGraph(actionableResource.getURI());
 	}
 
 	public boolean isApplicable()
 	{
-		return fGraphStore.getDefaultGraph().contains(null, ACTN.action, ResourceFactory.createResource(fURI));
+		Model actionModel = fGraphStore.getNamedGraph(fURI);
+		Resource action = ResourceFactory.createResource(fURI);
+		Resource actionableResource = actionModel.listSubjectsWithProperty(ACTN.affordedBy, action).next().asResource();
+		
+		return fGraphStore.getNamedGraph(actionableResource.getURI()).contains(actionableResource, ACTN.action, action);
 	}
 	
 	public boolean isValidConsumable(Model consumableModel)
