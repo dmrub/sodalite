@@ -10,8 +10,8 @@
   	<groupId>de.dfki.resc28</groupId>
   	<artifactId>sodalite</artifactId>
   	<packaging>jar</packaging>
-  	<version>0.1</version>
-  
+  	<version>0.2</version>
+
   	<name>Sodalite - a "Linked API Core"</name>
   	<url>https://github.com/rmrschub/sodalite</url>
 
@@ -23,12 +23,12 @@
 		<dependency>
 		    <groupId>de.dfki.resc28</groupId>
 		    <artifactId>igraphstore</artifactId>
-		    <version>0.1</version>
+                    <version>0.2</version>
 		</dependency>
 		<dependency>
 		    <groupId>de.dfki.resc28</groupId>
 		    <artifactId>flapjack</artifactId>
-		    <version>0.0.1-SNAPSHOT</version>
+		    <version>0.2.0</version>
 		</dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -96,6 +96,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -109,6 +110,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
                	<configuration>
                		<failOnError>false</failOnError>
                		<failOnWarning>false</failOnWarning>
