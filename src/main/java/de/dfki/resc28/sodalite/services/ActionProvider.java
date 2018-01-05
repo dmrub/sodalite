@@ -27,139 +27,125 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 
 import de.dfki.resc28.flapjack.services.BaseService;
+import static de.dfki.resc28.flapjack.services.BaseService.RDF_MEDIA_TYPES;
 import de.dfki.resc28.igraphstore.Constants;
 import de.dfki.resc28.igraphstore.IGraphStore;
 import de.dfki.resc28.sodalite.actions.IAction;
 import de.dfki.resc28.sodalite.actions.IActionController;
+import javax.ws.rs.core.MediaType;
 
 /**
  * @author resc01
  *
  */
-public abstract class ActionProvider extends BaseService
-{
-	public ActionProvider(IGraphStore graphStore)
-	{
-		this.fGraphStore = graphStore;
-	}
+public abstract class ActionProvider extends BaseService {
 
-	@Path("model")
-	@GET
-	@Produces({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	public Response describeModel(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType)
-	{
-		final Model model = fGraphStore.getNamedGraph(getCanonicalURL(fRequestUrl.getRequestUri()));
-		StreamingOutput out = new StreamingOutput() 
-		{
-			public void write(OutputStream output) throws IOException, WebApplicationException
-			{
-				RDFDataMgr.write(output, model, RDFDataMgr.determineLang(null, acceptType, null)) ;
-			}
-		};
-		
-		return Response.ok(out)
-				   	   .type(acceptType)
-				   	   .build();
-	}
-	
-	@Path("actions/{actionID: .+}")
-	@GET
-	@Produces({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	public Response describeAction(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType)
-	{
-		IAction action = getActionController().get(getCanonicalURL(fRequestUrl.getRequestUri()));
-		
-		if (action == null)
-		{
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		else 
-		{
-			return action.describe(acceptType);
-		}
-	}
-	
-	@Path("actions/{actionID: .+}")
-	@POST
-	@Consumes({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	@Produces({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	public Response executeByPOST(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType,
-								  @HeaderParam(HttpHeaders.ACCEPT) final String contentType,
-								  InputStream consumableStream)
-	{
-		IAction action = getActionController().get(getCanonicalURL(fRequestUrl.getRequestUri()));
-		
-		if (action == null)
-		{
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		else if (!(action.getAllowedMethods().contains(HttpMethod.POST)))
-		{
-			return Response.status(Status.METHOD_NOT_ALLOWED).build();
-		}
-		else if (!action.isApplicable())
-		{
-			return Response.status(Status.FORBIDDEN).build();
-		}
-		else {
-			return action.execute(consumableStream, contentType, acceptType);
-		}
-	}
-	
-	@Path("actions/{actionID: .+}")
-	@PUT
-	@Consumes({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	@Produces({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	public Response executeByPUT(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType,
-								 @HeaderParam(HttpHeaders.ACCEPT) final String contentType,
-								 InputStream consumableStream)
-	{
-		IAction action = getActionController().get(getCanonicalURL(fRequestUrl.getRequestUri()));
-		
-		if (action == null)
-		{
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		else if (!(action.getAllowedMethods().contains(HttpMethod.PUT)))
-		{
-			return Response.status(Status.METHOD_NOT_ALLOWED).build();
-		}
-		else if (!action.isApplicable())
-		{
-			return Response.status(Status.FORBIDDEN).build();
-		}
-		else {
-			return action.execute(consumableStream, contentType, acceptType);
-		}
-	}
-	
-	@Path("/actions/{actionID: .+}")
-	@PATCH
-	@Consumes({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	@Produces({ Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE })
-	public Response executeByPATCH(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType,
-								   @HeaderParam(HttpHeaders.ACCEPT) final String contentType,
-								   InputStream consumableStream)
-	{
-		IAction action = getActionController().get(getCanonicalURL(fRequestUrl.getRequestUri()));
-		
-		if (action == null)
-		{
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		else if (!(action.getAllowedMethods().contains("PATCH")))
-		{
-			return Response.status(Status.METHOD_NOT_ALLOWED).build();
-		}
-		else if (!action.isApplicable())
-		{
-			return Response.status(Status.FORBIDDEN).build();
-		}
-		else {
-			return action.execute(consumableStream, contentType, acceptType);
-		}
-	}
-	
-	protected abstract IActionController getActionController();
-	protected IGraphStore fGraphStore;
+    public ActionProvider(IGraphStore graphStore) {
+        this.fGraphStore = graphStore;
+    }
+
+    @Path("model")
+    @GET
+    @Produces({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    public Response describeModel(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType) {
+        final MediaType responseMediaType = negotiateRDFMediaType();
+        if (responseMediaType == null) {
+            return Response.notAcceptable(RDF_MEDIA_TYPES).build();
+        }
+        final String responseMediaTypeStr = responseMediaType.getType() + "/" + responseMediaType.getSubtype();
+
+        final Model model = fGraphStore.getNamedGraph(getResourceURI(fRequestUrl));
+        StreamingOutput out = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                RDFDataMgr.write(output, model, RDFDataMgr.determineLang(null, responseMediaTypeStr, null));
+            }
+        };
+
+        return Response.ok(out)
+                .type(responseMediaTypeStr)
+                .build();
+    }
+
+    @Path("actions/{actionID: .+}")
+    @GET
+    @Produces({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    public Response describeAction(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType) {
+        IAction action = getActionController().get(getResourceURI(fRequestUrl));
+
+        if (action == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        } else {
+            final MediaType responseMediaType = negotiateRDFMediaType();
+            if (responseMediaType == null) {
+                return Response.notAcceptable(RDF_MEDIA_TYPES).build();
+            }
+            final String responseMediaTypeStr = responseMediaType.getType() + "/" + responseMediaType.getSubtype();
+
+            return action.describe(responseMediaTypeStr);
+        }
+    }
+
+    @Path("actions/{actionID: .+}")
+    @POST
+    @Consumes({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    @Produces({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    public Response executeByPOST(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType,
+            @HeaderParam(HttpHeaders.ACCEPT) final String contentType,
+            InputStream consumableStream) {
+        IAction action = getActionController().get(getResourceURI(fRequestUrl));
+
+        if (action == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        } else if (!(action.getAllowedMethods().contains(HttpMethod.POST))) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        } else if (!action.isApplicable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        } else {
+            return action.execute(consumableStream, contentType, acceptType);
+        }
+    }
+
+    @Path("actions/{actionID: .+}")
+    @PUT
+    @Consumes({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    @Produces({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    public Response executeByPUT(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType,
+            @HeaderParam(HttpHeaders.ACCEPT) final String contentType,
+            InputStream consumableStream) {
+        IAction action = getActionController().get(getResourceURI(fRequestUrl));
+
+        if (action == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        } else if (!(action.getAllowedMethods().contains(HttpMethod.PUT))) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        } else if (!action.isApplicable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        } else {
+            return action.execute(consumableStream, contentType, acceptType);
+        }
+    }
+
+    @Path("/actions/{actionID: .+}")
+    @PATCH
+    @Consumes({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    @Produces({Constants.CT_APPLICATION_JSON_LD, Constants.CT_APPLICATION_NQUADS, Constants.CT_APPLICATION_NTRIPLES, Constants.CT_APPLICATION_RDF_JSON, Constants.CT_APPLICATION_RDFXML, Constants.CT_APPLICATION_TRIX, Constants.CT_APPLICATION_XTURTLE, Constants.CT_TEXT_N3, Constants.CT_TEXT_TRIG, Constants.CT_TEXT_TURTLE})
+    public Response executeByPATCH(@HeaderParam(HttpHeaders.ACCEPT) final String acceptType,
+            @HeaderParam(HttpHeaders.ACCEPT) final String contentType,
+            InputStream consumableStream) {
+        IAction action = getActionController().get(getResourceURI(fRequestUrl));
+
+        if (action == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        } else if (!(action.getAllowedMethods().contains("PATCH"))) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        } else if (!action.isApplicable()) {
+            return Response.status(Status.FORBIDDEN).build();
+        } else {
+            return action.execute(consumableStream, contentType, acceptType);
+        }
+    }
+
+    protected abstract IActionController getActionController();
+    protected IGraphStore fGraphStore;
 }
