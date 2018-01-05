@@ -49,12 +49,14 @@ public class Action implements IAction
 		this.fRDFType = ACTN.Action;
 	}
 
-	public Response describe(final String acceptType) 
+        @Override
+	public Response describe(final String acceptType)
 	{
 		final Model actionModel = fGraphStore.getNamedGraph(fURI);
-		
-		StreamingOutput out = new StreamingOutput() 
+
+		StreamingOutput out = new StreamingOutput()
 		{
+                        @Override
 			public void write(OutputStream output) throws IOException, WebApplicationException
 			{
 				RDFDataMgr.write(output, actionModel, RDFDataMgr.determineLang(null, acceptType, null)) ;
@@ -65,10 +67,11 @@ public class Action implements IAction
 					   .type(acceptType)
 					   .build();
 	}
-	
+
+        @Override
 	public Response execute(InputStream consumableStream, String contentType, final String acceptType)
 	{
-		Model consumable = ModelFactory.createDefaultModel(); 
+		Model consumable = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(consumable, consumableStream, RDFDataMgr.determineLang(null, acceptType, null));
 			
 		if (isApplicable() & isValidConsumable(consumable))
@@ -77,8 +80,9 @@ public class Action implements IAction
 						
 			// TODO: get Model's base name for the contentLocation header
 
-			StreamingOutput out = new StreamingOutput() 
+			StreamingOutput out = new StreamingOutput()
 			{
+                                @Override
 				public void write(OutputStream output) throws IOException, WebApplicationException
 				{
 					RDFDataMgr.write(output, producible, RDFDataMgr.determineLang(null, acceptType, null)) ;
@@ -159,6 +163,7 @@ public class Action implements IAction
 		return fGraphStore.getNamedGraph(actionableResource.getURI());
 	}
 
+        @Override
 	public boolean isApplicable()
 	{
 		Model actionModel = fGraphStore.getNamedGraph(fURI);
@@ -167,11 +172,12 @@ public class Action implements IAction
 		
 		return fGraphStore.getNamedGraph(actionableResource.getURI()).contains(actionableResource, ACTN.action, action);
 	}
-	
+
+        @Override
 	public boolean isValidConsumable(Model consumableModel)
 	{
 		Model actionModel = fGraphStore.getNamedGraph(fURI);
-		
+
 		// construct sparqlPrologue
 		PrefixMapping pfxMap = PrefixMapping.Factory.create();
 		pfxMap.setNsPrefixes(actionModel.getGraph().getPrefixMapping());
@@ -196,8 +202,9 @@ public class Action implements IAction
 		boolean isValid = QueryExecutionFactory.create(jenaQuery, consumableModel).execAsk(); 
 		return isValid;
 	}
-	
-	public Set<String> getAllowedMethods() 
+
+        @Override
+	public Set<String> getAllowedMethods()
 	{
 		HashSet<String> allowedMethods = new HashSet<String>();
 		allowedMethods.add(HttpMethod.GET);
